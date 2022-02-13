@@ -34,9 +34,9 @@ class PersonController {
 
       return await Person.create(data)
 
-    } catch (erro) {
+    } catch (error) {
 
-      throw erro
+      throw error
 
     }
   }
