@@ -1,8 +1,9 @@
 'use strict'
+const Person = use('App/Models/Person')
+
 
 /** @typedef {import('@adonisjs/framework/src/Request')} Request */
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
-/** @typedef {import('@adonisjs/framework/src/View')} View */
 
 /**
  * Resourceful controller for interacting with people
@@ -13,23 +14,10 @@ class PersonController {
    * GET people
    *
    * @param {object} ctx
-   * @param {Request} ctx.request
    * @param {Response} ctx.response
-   * @param {View} ctx.view
    */
-  async index ({ request, response, view }) {
-  }
-
-  /**
-   * Render a form to be used for creating a new person.
-   * GET people/create
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async create ({ request, response, view }) {
+  async index({ response }) {
+    return await Person.all()
   }
 
   /**
@@ -40,7 +28,17 @@ class PersonController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async store ({ request, response }) {
+  async store({ request, response }) {
+    const data = request.all();
+    try {
+
+      return await Person.create(data)
+
+    } catch (erro) {
+
+      throw erro
+
+    }
   }
 
   /**
@@ -48,23 +46,15 @@ class PersonController {
    * GET people/:id
    *
    * @param {object} ctx
-   * @param {Request} ctx.request
    * @param {Response} ctx.response
-   * @param {View} ctx.view
    */
-  async show ({ params, request, response, view }) {
-  }
+  async show({ params, response }) {
+    const { id } = params
+    const person = await Person.find(id)
 
-  /**
-   * Render a form to update an existing person.
-   * GET people/:id/edit
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async edit ({ params, request, response, view }) {
+    return person
+      ? response.ok(person)
+      : response.notFound()
   }
 
   /**
@@ -75,7 +65,19 @@ class PersonController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async update ({ params, request, response }) {
+  async update({ params, request, response }) {
+    const { id } = params
+    const data = request.all()
+    const person = await Person.find(id)
+
+    if (person) {
+      person.merge(data)
+      await person.save()
+
+      return response.ok(person)
+    }
+
+    return response.notFound()
   }
 
   /**
@@ -86,7 +88,16 @@ class PersonController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async destroy ({ params, request, response }) {
+  async destroy({ params, response }) {
+    const { id } = params
+    const person = await Person.find(id)
+
+    if (person) {
+      await person.delete()
+      return response.ok(person)
+    }
+
+    await response.notFound()
   }
 }
 
