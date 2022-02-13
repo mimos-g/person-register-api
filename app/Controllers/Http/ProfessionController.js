@@ -1,8 +1,9 @@
 'use strict'
+const Profession = use('App/Models/Profession')
+
 
 /** @typedef {import('@adonisjs/framework/src/Request')} Request */
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
-/** @typedef {import('@adonisjs/framework/src/View')} View */
 
 /**
  * Resourceful controller for interacting with professions
@@ -13,23 +14,10 @@ class ProfessionController {
    * GET professions
    *
    * @param {object} ctx
-   * @param {Request} ctx.request
    * @param {Response} ctx.response
-   * @param {View} ctx.view
    */
-  async index ({ request, response, view }) {
-  }
-
-  /**
-   * Render a form to be used for creating a new profession.
-   * GET professions/create
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async create ({ request, response, view }) {
+  async index({ response }) {
+    return Profession.all();
   }
 
   /**
@@ -40,7 +28,17 @@ class ProfessionController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async store ({ request, response }) {
+  async store({ request, response }) {
+    const data = request.all();
+    try {
+
+      return await Profession.create(data)
+
+    } catch (erro) {
+
+      throw erro
+
+    }
   }
 
   /**
@@ -48,23 +46,15 @@ class ProfessionController {
    * GET professions/:id
    *
    * @param {object} ctx
-   * @param {Request} ctx.request
    * @param {Response} ctx.response
-   * @param {View} ctx.view
    */
-  async show ({ params, request, response, view }) {
-  }
+  async show({ params, response }) {
+    const { id } = params
+    const profession = await Profession.find(id)
 
-  /**
-   * Render a form to update an existing profession.
-   * GET professions/:id/edit
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async edit ({ params, request, response, view }) {
+    return profession
+      ? response.ok(profession)
+      : response.notFound()
   }
 
   /**
@@ -75,7 +65,19 @@ class ProfessionController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async update ({ params, request, response }) {
+  async update({ params, request, response }) {
+    const { id } = params
+    const data = request.all()
+    const profession = await Profession.find(id)
+
+    if (profession) {
+      profession.merge(data)
+      await profession.save()
+
+      return profession
+    }
+
+    await response.notFound()
   }
 
   /**
@@ -86,7 +88,16 @@ class ProfessionController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async destroy ({ params, request, response }) {
+  async destroy({ params, request, response }) {
+    const { id } = params
+    const profession = await Profession.find(id)
+
+    if (profession) {
+      await profession.delete()
+      return response.ok()
+    }
+
+    await response.notFound()
   }
 }
 
